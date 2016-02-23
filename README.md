@@ -27,11 +27,11 @@
 
 
 ## ScreenShot
-1. 5.0之上
+1. 5.0之上<br>
 ![TSnackbar](images/TSnackbarL.gif "5.0 sample")
-2. 4.4
+2. 4.4<br>
 ![TSnackbar](images/TSnackbarK.gif "4.4 sample")
-3. 4.4以下
+3. 4.4以下<br>
 ![TSnackbar](images/TSnackbar.gif "4.4 sample")
 
 ## Thanks To
