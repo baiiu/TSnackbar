@@ -122,7 +122,8 @@ public class LUtils {
     }
 
     private static final int[] THEME_ATTRS = {
-            android.R.attr.colorPrimaryDark
+            android.R.attr.colorPrimaryDark,
+            android.R.attr.windowTranslucentStatus
     };
 
 
@@ -130,6 +131,16 @@ public class LUtils {
         final TypedArray a = context.obtainStyledAttributes(THEME_ATTRS);
         try {
             return a.getColor(0, Color.TRANSPARENT);
+        } finally {
+            a.recycle();
+        }
+    }
+
+    public static boolean getWindowTranslucentStatus(Context context) {
+        final TypedArray a = context.obtainStyledAttributes(THEME_ATTRS);
+
+        try {
+            return a.getBoolean(1, false);
         } finally {
             a.recycle();
         }

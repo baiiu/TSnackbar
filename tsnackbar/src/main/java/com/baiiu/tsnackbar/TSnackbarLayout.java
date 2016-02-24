@@ -24,6 +24,8 @@ public class TSnackbarLayout extends LinearLayout {
     private float mAlphaStartSwipeDistance = 0.1F;
     private float mAlphaEndSwipeDistance = 0.8F;
 
+    private static boolean windowTranslucentStatus = false;
+
     private View container;
     private TextView textView;
 
@@ -51,15 +53,12 @@ public class TSnackbarLayout extends LinearLayout {
         container = findViewById(R.id.ll_container);
         textView = (TextView) findViewById(android.R.id.text1);
 
-        if (LUtils.hasKitKat()) {
+        if (TSnackbarLayout.windowTranslucentStatus || LUtils.getWindowTranslucentStatus(getContext())) {
+            TSnackbarLayout.windowTranslucentStatus = true;
             container.setPadding(0, ScreenUtil.getStatusHeight(getContext()), 0, 0);
         }
 
-        //如果5.0空间上有fitSystemWindows
-//        if(LUtils.hasL()){
-//            View view = findViewById(R.id.ll_container);
-//            view.setPadding(0, ScreenUtil.getStatusHeight(view.getContext()), 0, 0);
-//        }
+        //注意fitSystemWindows的使用,只添加在Toolbar上和AppBarLayout上
 
     }
 
