@@ -24,6 +24,7 @@ public class TSnackbar implements TSnackbarLayout.onViewAlphaChangedListener {
     private ViewGroup mParent;
 
     private TSnackbarLayout mView;
+    private static boolean coordinatorLayoutFitSystemWindows = false;
 
     public static final int LENGTH_INDEFINITE = -1;
     public static final int LENGTH_SHORT = -2;
@@ -75,6 +76,17 @@ public class TSnackbar implements TSnackbarLayout.onViewAlphaChangedListener {
         TSnackbar snackbar = new TSnackbar(findSuitableParent(view), message, prompt);
         snackbar.setDuration(duration);
         return snackbar;
+    }
+
+    /**
+     * 跟布局为coordinatorLayout,并且添加了fitSystemWindows时,需调用该方法,调整TSnackbar高度
+     */
+    public static void setCoordinatorLayoutFitsSystemWindows(boolean coordinatorLayoutFitSystemWindows) {
+        TSnackbar.coordinatorLayoutFitSystemWindows = coordinatorLayoutFitSystemWindows;
+    }
+
+    public static boolean isCoordinatorLayoutFitsSystemWindows() {
+        return coordinatorLayoutFitSystemWindows;
     }
 
     public void setDuration(int duration) {
@@ -242,6 +254,4 @@ public class TSnackbar implements TSnackbarLayout.onViewAlphaChangedListener {
     public TSnackbarLayout getView() {
         return mView;
     }
-
-
 }

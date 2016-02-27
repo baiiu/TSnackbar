@@ -12,7 +12,6 @@ import com.baiiu.tsnackbar.TSnackbar;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
-    private LUtils lUtils;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -21,6 +20,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        //跟布局为CoordinatorLayout,并且添加了fitsSystemWindows属性,需要调用该方法
+        //建议将该属性添加在Toolbar上或者AppBarLayout上
+        TSnackbar.setCoordinatorLayoutFitsSystemWindows(true);
+
+        //若将fitsSystemWindows添加在AppBarLayout或者Toolbar上,则不用调用此方法
         if (LUtils.hasKitKat()) {
             LUtils.instance(this).setStatusBarColor(getResources().getColor(R.color.colorPrimaryDark));
         }

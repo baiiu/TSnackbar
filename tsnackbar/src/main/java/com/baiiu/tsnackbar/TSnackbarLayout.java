@@ -56,10 +56,12 @@ public class TSnackbarLayout extends LinearLayout {
         if (TSnackbarLayout.windowTranslucentStatus || LUtils.getWindowTranslucentStatus(getContext())) {
             TSnackbarLayout.windowTranslucentStatus = true;
             container.setPadding(0, ScreenUtil.getStatusHeight(getContext()), 0, 0);
+            return;
         }
 
-        //注意fitSystemWindows的使用,只添加在Toolbar上和AppBarLayout上
-
+        if (TSnackbar.isCoordinatorLayoutFitsSystemWindows()) {
+            container.setPadding(0, ScreenUtil.getStatusHeight(getContext()), 0, 0);
+        }
     }
 
     @Override
