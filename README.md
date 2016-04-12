@@ -22,8 +22,11 @@
     //也可以指定某种状态的颜色
     Prompt.SUCCESS.setBackgroundColor(R.color.wanted_color);
     
-    //注意:要在Activity.onDestory()里调用LUtils.instance(this).clear();避免内存泄露
 ```
+
+## 注意
+   要在主Activity.onDestory()里调用LUtils.clear();避免内存泄露
+
 
 
 ## ScreenShot
