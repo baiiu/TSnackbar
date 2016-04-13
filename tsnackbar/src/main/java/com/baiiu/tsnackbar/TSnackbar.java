@@ -66,6 +66,10 @@ public class TSnackbar implements TSnackbarLayout.onViewAlphaChangedListener {
         }
     }
 
+    public static void setColorPrimaryDark(int mColorPrimaryDark) {
+        TSnackbar.mColorPrimaryDark = mColorPrimaryDark;
+    }
+
     @NonNull
     public static TSnackbar make(@NonNull View view, @NonNull String message, @NonNull Prompt prompt) {
         return make(view, message, prompt, LENGTH_SHORT);

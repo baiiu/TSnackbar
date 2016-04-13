@@ -53,10 +53,13 @@ import android.view.ViewGroup;
   }
 
   public static void clear() {
+    resetColorPrimaryDark();
+
     if (instance != null) {
       instance.mActivity = null;
       instance = null;
     }
+
   }
 
   public static boolean hasL() {
@@ -146,5 +149,10 @@ import android.view.ViewGroup;
     } finally {
       a.recycle();
     }
+  }
+
+
+  public static void resetColorPrimaryDark() {
+    TSnackbar.setColorPrimaryDark(-1);
   }
 }
