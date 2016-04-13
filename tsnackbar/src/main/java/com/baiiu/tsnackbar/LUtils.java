@@ -53,8 +53,10 @@ import android.view.ViewGroup;
   }
 
   public static void clear() {
-    instance.mActivity = null;
-    instance = null;
+    if (instance != null) {
+      instance.mActivity = null;
+      instance = null;
+    }
   }
 
   public static boolean hasL() {
