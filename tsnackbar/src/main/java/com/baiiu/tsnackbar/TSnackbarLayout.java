@@ -4,11 +4,12 @@ import android.content.Context;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.widget.ViewDragHelper;
 import android.util.AttributeSet;
+import android.util.Log;
+import android.util.TypedValue;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-
 
 /**
  * author: baiiu
@@ -47,28 +48,34 @@ public class TSnackbarLayout extends LinearLayout {
         mDragHelper = ViewDragHelper.create(this, new TSnackbarCallBack());
     }
 
-    @Override
-    protected void onFinishInflate() {
+    @Override protected void onFinishInflate() {
         super.onFinishInflate();
         container = findViewById(R.id.ll_container);
         textView = (TextView) findViewById(android.R.id.text1);
 
-        if (TSnackbarLayout.windowTranslucentStatus || LUtils.getWindowTranslucentStatus(getContext())) {
-            TSnackbarLayout.windowTranslucentStatus = true;
+        if (/*TSnackbarLayout.windowTranslucentStatus || */LUtils.getWindowTranslucentStatus(getContext())) {
+            //            TSnackbarLayout.windowTranslucentStatus = true;
             container.setPadding(0, ScreenUtil.getStatusHeight(getContext()), 0, 0);
             return;
         }
 
-        if (TSnackbar.isCoordinatorLayoutFitsSystemWindows()) {
+        if (TSnackBar.isCoordinatorLayoutFitsSystemWindows()) {
             container.setPadding(0, ScreenUtil.getStatusHeight(getContext()), 0, 0);
         }
     }
 
-    @Override
-    protected void onLayout(boolean changed, int l, int t, int r, int b) {
+    @Override protected void onLayout(boolean changed, int l, int t, int r, int b) {
         super.onLayout(changed, l, t, r, b);
         if (changed && mOnLayoutChangeListener != null) {
             mOnLayoutChangeListener.onLayoutChange(this, l, t, r, b);
+        }
+
+
+        TypedValue tv = new TypedValue();
+        if (getContext().getTheme()
+                .resolveAttribute(android.R.attr.actionBarSize, tv, true)) {
+            int actionBarHeight = TypedValue.complexToDimensionPixelSize(tv.data, getResources().getDisplayMetrics());
+            Log.d(getClass().getSimpleName(), actionBarHeight + "," + container.getMeasuredHeight());
         }
     }
 
@@ -116,25 +123,22 @@ public class TSnackbarLayout extends LinearLayout {
     private class TSnackbarCallBack extends ViewDragHelper.Callback {
         private int mOriginalCapturedViewLeft;
 
-        @Override
-        public boolean tryCaptureView(View child, int pointerId) {
+        @Override public boolean tryCaptureView(View child, int pointerId) {
             return container == child;
         }
 
-        @Override
-        public void onViewCaptured(View capturedChild, int activePointerId) {
+        @Override public void onViewCaptured(View capturedChild, int activePointerId) {
             mOriginalCapturedViewLeft = capturedChild.getLeft();//最初距离左边的距离
         }
 
-        @Override
-        public void onViewReleased(View releasedChild, float xvel, float yvel) {
+        @Override public void onViewReleased(View releasedChild, float xvel, float yvel) {
             final int childWidth = releasedChild.getWidth();
             int targetLeft;
             //矢量
             if (shouldDismiss(releasedChild, xvel)) {
-                targetLeft = releasedChild.getLeft() < mOriginalCapturedViewLeft
-                        ? mOriginalCapturedViewLeft - childWidth
-                        : mOriginalCapturedViewLeft + childWidth;
+                targetLeft =
+                        releasedChild.getLeft() < mOriginalCapturedViewLeft ? mOriginalCapturedViewLeft - childWidth
+                                : mOriginalCapturedViewLeft + childWidth;
             } else {
                 targetLeft = mOriginalCapturedViewLeft;
             }
@@ -154,17 +158,14 @@ public class TSnackbarLayout extends LinearLayout {
             }
         }
 
-        @Override
-        public int clampViewPositionHorizontal(View child, int left, int dx) {
+        @Override public int clampViewPositionHorizontal(View child, int left, int dx) {
             return left;
         }
 
-        @Override
-        public void onViewPositionChanged(View changedView, int left, int top, int dx, int dy) {
-            final float startAlphaDistance = mOriginalCapturedViewLeft
-                    + changedView.getWidth() * mAlphaStartSwipeDistance;
-            final float endAlphaDistance = mOriginalCapturedViewLeft
-                    + changedView.getWidth() * mAlphaEndSwipeDistance;
+        @Override public void onViewPositionChanged(View changedView, int left, int top, int dx, int dy) {
+            final float startAlphaDistance =
+                    mOriginalCapturedViewLeft + changedView.getWidth() * mAlphaStartSwipeDistance;
+            final float endAlphaDistance = mOriginalCapturedViewLeft + changedView.getWidth() * mAlphaEndSwipeDistance;
 
             left = Math.abs(left);
             float alpha;
@@ -183,15 +184,16 @@ public class TSnackbarLayout extends LinearLayout {
             }
         }
 
-        @Override
-        public void onViewDragStateChanged(int state) {
+        @Override public void onViewDragStateChanged(int state) {
             switch (state) {
                 case ViewDragHelper.STATE_SETTLING:
                 case ViewDragHelper.STATE_DRAGGING:
-                    TSnackBarManager.instance().cancelTimeout();
+                    TSnackBarManager.instance()
+                            .cancelTimeout();
                     break;
                 case ViewDragHelper.STATE_IDLE:
-                    TSnackBarManager.instance().restoreTimeout();
+                    TSnackBarManager.instance()
+                            .restoreTimeout();
                     break;
             }
         }
@@ -203,25 +205,23 @@ public class TSnackbarLayout extends LinearLayout {
         }
     }
 
-    @Override
-    public void computeScroll() {
+    @Override public void computeScroll() {
         if (mDragHelper != null && mDragHelper.continueSettling(true)) {
             ViewCompat.postInvalidateOnAnimation(this);
             return;
         }
 
         if (ViewCompat.getAlpha(container) == 0) {
-            TSnackBarManager.instance().clearCurrentSnackbar();
+            TSnackBarManager.instance()
+                    .clearCurrentSnackbar();
         }
     }
 
-    @Override
-    public boolean onInterceptTouchEvent(MotionEvent ev) {
+    @Override public boolean onInterceptTouchEvent(MotionEvent ev) {
         return mDragHelper != null && mDragHelper.shouldInterceptTouchEvent(ev);
     }
 
-    @Override
-    public boolean onTouchEvent(MotionEvent event) {
+    @Override public boolean onTouchEvent(MotionEvent event) {
         if (mDragHelper != null) {
             mDragHelper.processTouchEvent(event);
         }

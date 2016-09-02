@@ -7,14 +7,14 @@ package com.baiiu.tsnackbar;
  */
 public enum Prompt {
     /**
-     * 红色,错误
+     * 红色,错误s
      */
     ERROR(R.drawable.common_bounced_icon_error, R.color.prompt_error),
 
     /**
      * 红色,警告
      */
-    WARNING(R.drawable.common_bounced_icon_warning, R.color.prompt_warning),
+    WARNING(R.drawable.common_bounced_icon_warning, R.color.prompt_error),
 
     /**
      * 绿色,成功

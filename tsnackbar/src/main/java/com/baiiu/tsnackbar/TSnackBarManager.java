@@ -7,7 +7,7 @@ import android.os.Message;
 public class TSnackBarManager {
     private volatile static TSnackBarManager instance;
     private final Handler mHandler;
-    TSnackbar mCurrentSnackBar;
+    TSnackBar mCurrentSnackBar;
 
     private static final int MSG_TIMEOUT = 0;
 
@@ -35,7 +35,7 @@ public class TSnackBarManager {
     }
 
 
-    public void show(int duration, TSnackbar nextSnackBar) {
+    public void show(int duration, TSnackBar nextSnackBar) {
         if (nextSnackBar == null) {
             return;
         }
@@ -49,7 +49,7 @@ public class TSnackBarManager {
 
         nextSnackBar.showView();
 
-        if (duration != TSnackbar.LENGTH_INDEFINITE) {
+        if (duration != TSnackBar.LENGTH_INDEFINITE) {
             mCurrentSnackBar = nextSnackBar;
             scheduleTimeout(duration);
         }
@@ -70,10 +70,10 @@ public class TSnackBarManager {
     }
 
     public void scheduleTimeout(int duration) {
-        int handlerDuration = TSnackbar.ANIMATION_DURATION;
-        if (duration == TSnackbar.LENGTH_SHORT) {
+        int handlerDuration = TSnackBar.ANIMATION_DURATION;
+        if (duration == TSnackBar.LENGTH_SHORT) {
             handlerDuration += LENGTH_SHORT;
-        } else if (duration == TSnackbar.LENGTH_LONG) {
+        } else if (duration == TSnackBar.LENGTH_LONG) {
             handlerDuration += LENGTH_LONG;
         } else {
             handlerDuration += duration;
