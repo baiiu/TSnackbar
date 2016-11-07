@@ -24,7 +24,8 @@ public class ScreenUtil {
     public static int getScreenWidth(Context context) {
         WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
         DisplayMetrics outMetrics = new DisplayMetrics();
-        wm.getDefaultDisplay().getMetrics(outMetrics);
+        wm.getDefaultDisplay()
+                .getMetrics(outMetrics);
         return outMetrics.widthPixels;
     }
 
@@ -34,7 +35,8 @@ public class ScreenUtil {
     public static int getScreenHeight(Context context) {
         WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
         DisplayMetrics outMetrics = new DisplayMetrics();
-        wm.getDefaultDisplay().getMetrics(outMetrics);
+        wm.getDefaultDisplay()
+                .getMetrics(outMetrics);
         return outMetrics.heightPixels;
     }
 
@@ -44,22 +46,21 @@ public class ScreenUtil {
     private static int mStatusHeight = -1;
 
     public static int getStatusHeight(Context context) {
-
         if (mStatusHeight != -1) {
             return mStatusHeight;
         }
 
-
         try {
-//            Class<?> clazz = Class.forName("com.android.internal.R$dimen");
-//            Object object = clazz.newInstance();
-//            int height = Integer.parseInt(clazz.getField("status_bar_height").get(object).toString());
-//            mStatusHeight = context.getResources().getDimensionPixelSize(height);
-            int resourceId = context.getResources().getIdentifier("status_bar_height", "dimen", "android");
+            //            Class<?> clazz = Class.forName("com.android.internal.R$dimen");
+            //            Object object = clazz.newInstance();
+            //            int height = Integer.parseInt(clazz.getField("status_bar_height").get(object).toString());
+            //            mStatusHeight = context.getResources().getDimensionPixelSize(height);
+            int resourceId = context.getResources()
+                    .getIdentifier("status_bar_height", "dimen", "android");
             if (resourceId > 0) {
-                mStatusHeight = context.getResources().getDimensionPixelSize(resourceId);
+                mStatusHeight = context.getResources()
+                        .getDimensionPixelSize(resourceId);
             }
-
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -71,13 +72,15 @@ public class ScreenUtil {
 
     private static int mActionBarHeight = -1;
 
+    //don't the application context
     public static int getActionBarHeight(Context context) {
 
         if (mActionBarHeight != -1) {
             return mActionBarHeight;
         }
 
-        TypedArray typedArray = context.obtainStyledAttributes(new int[]{android.R.attr.actionBarSize});
+        TypedArray typedArray = context.getTheme()
+                .obtainStyledAttributes(new int[] { android.R.attr.actionBarSize });
         mActionBarHeight = (int) typedArray.getDimension(0, 0);
         typedArray.recycle();
 
@@ -88,7 +91,8 @@ public class ScreenUtil {
      * 获取当前屏幕截图，包含状态栏
      */
     public static Bitmap snapShotWithStatusBar(Activity activity) {
-        View view = activity.getWindow().getDecorView();
+        View view = activity.getWindow()
+                .getDecorView();
         view.setDrawingCacheEnabled(true);
         view.buildDrawingCache();
         Bitmap bmp = view.getDrawingCache();
@@ -104,7 +108,8 @@ public class ScreenUtil {
      * 获取当前屏幕截图，不包含状态栏
      */
     public static Bitmap snapShotWithoutStatusBar(Activity activity) {
-        View view = activity.getWindow().getDecorView();
+        View view = activity.getWindow()
+                .getDecorView();
         view.setDrawingCacheEnabled(true);
         view.buildDrawingCache();
 
@@ -114,7 +119,9 @@ public class ScreenUtil {
         }
 
         Rect frame = new Rect();
-        activity.getWindow().getDecorView().getWindowVisibleDisplayFrame(frame);
+        activity.getWindow()
+                .getDecorView()
+                .getWindowVisibleDisplayFrame(frame);
         int statusBarHeight = frame.top;
         Bitmap bp = Bitmap.createBitmap(bmp, 0, statusBarHeight, bmp.getWidth(), bmp.getHeight() - statusBarHeight);
         view.destroyDrawingCache();

@@ -4,10 +4,10 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 
-public class TSnackBarManager {
+class TSnackBarManager {
     private volatile static TSnackBarManager instance;
     private final Handler mHandler;
-    TSnackBar mCurrentSnackBar;
+    private TSnackBar mCurrentSnackBar;
 
     private static final int MSG_TIMEOUT = 0;
 
@@ -17,8 +17,7 @@ public class TSnackBarManager {
     public static TSnackBarManager instance() {
         if (instance == null) {
             synchronized (TSnackBarManager.class) {
-                if (instance == null)
-                    instance = new TSnackBarManager();
+                if (instance == null) instance = new TSnackBarManager();
             }
         }
         return instance;
@@ -26,8 +25,7 @@ public class TSnackBarManager {
 
     private TSnackBarManager() {
         mHandler = new Handler(Looper.getMainLooper(), new Handler.Callback() {
-            @Override
-            public boolean handleMessage(Message message) {
+            @Override public boolean handleMessage(Message message) {
                 dismissView();
                 return true;
             }
@@ -91,6 +89,5 @@ public class TSnackBarManager {
             scheduleTimeout(mCurrentSnackBar.getDuration());
         }
     }
-
 
 }

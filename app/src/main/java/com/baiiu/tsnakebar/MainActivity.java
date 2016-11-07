@@ -4,7 +4,6 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
-
 import com.baiiu.tsnackbar.LUtils;
 import com.baiiu.tsnackbar.Prompt;
 import com.baiiu.tsnackbar.TSnackBar;
@@ -19,14 +18,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         //跟布局为CoordinatorLayout,并且添加了fitsSystemWindows属性,需要调用该方法
         //建议将该属性添加在Toolbar上或者AppBarLayout上
-        TSnackBar.setCoordinatorLayoutFitsSystemWindows(true);
+        //TSnackBar.setCoordinatorLayoutFitsSystemWindows(true);
 
         //若将fitsSystemWindows添加在AppBarLayout或者Toolbar上,则不用调用此方法
-        if (LUtils.hasKitKat()) {
-            LUtils.instance(this)
-                    .setStatusBarColor(getResources().getColor(R.color.colorPrimaryDark));
-        }
-
+        //if (LUtils.hasKitKat()) {
+        //    LUtils.instance(this)
+        //            .setStatusBarColor(getResources().getColor(R.color.colorPrimaryDark));
+        //}
     }
 
     @Override public void onClick(View v) {

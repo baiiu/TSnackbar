@@ -26,74 +26,61 @@ import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 
+/**
+ * 之所以做成对象,是要使用属性动画
+ */
 @TargetApi(Build.VERSION_CODES.LOLLIPOP)
 public class LUtils {
 
-    protected Activity mActivity;
-    private volatile static LUtils instance;
+    static final String ATTR_STATUSBAR_COLOR = "statusBarColor";
+
+    private Activity mActivity;
 
     private LUtils(Activity activity) {
         mActivity = activity;
     }
 
-    public static LUtils getInstance() {
-        return instance;
-    }
-
     public static LUtils instance(Activity activity) {
-        if (instance == null) {
-            synchronized (LUtils.class) {
-                if (instance == null) {
-                    instance = new LUtils(activity);
-                }
-            }
-        }
-        instance.setActivity(activity);
-        return instance;
+        return new LUtils(activity);
     }
 
     public void setActivity(Activity activity) {
         this.mActivity = activity;
     }
 
+    public int getStatusBarColor() {
+        return getStatusBarColor(mActivity);
+    }
+
+    public void setStatusBarColor(int color) {
+        setStatusBarColor(mActivity, color);
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+
+
     public static void clear() {
         resetColorPrimaryDark();
-
-        if (instance != null) {
-            instance.mActivity = null;
-            instance = null;
-        }
     }
 
-    public static boolean hasL() {
-        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP;
-    }
-
-    public static boolean hasKitKat() {
-        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT
-                && Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP;
-    }
-
-    public static boolean belowKitKat() {
-        return Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT;
-    }
-
-    public int getStatusBarColor() {
-        if (belowKitKat()) {
+    public static int getStatusBarColor(Activity activity) {
+        if (Version.belowKitKat()) {
             // On pre-kitKat devices, you can have any status bar color so long as it's black.
             return Color.BLACK;
         }
 
-        if (hasL()) {
-            return mActivity.getWindow()
+        if (Version.hasL()) {
+            return activity.getWindow()
                     .getStatusBarColor();
         }
 
-        if (hasKitKat()) {
-            ViewGroup contentView = (ViewGroup) mActivity.findViewById(android.R.id.content);
+        if (Version.hasKitKat()) {
+            ViewGroup contentView = (ViewGroup) activity.findViewById(android.R.id.content);
             View statusBarView = contentView.getChildAt(0);
-            if (statusBarView != null && statusBarView.getMeasuredHeight() == ScreenUtil.getStatusHeight(mActivity)) {
+            if (statusBarView != null && statusBarView.getMeasuredHeight() == ScreenUtil.getStatusHeight(activity)) {
                 Drawable drawable = statusBarView.getBackground();
                 if (drawable != null) {
                     return ((ColorDrawable) drawable).getColor();
@@ -104,66 +91,106 @@ public class LUtils {
         return -1;
     }
 
-    public void setStatusBarColor(int color) {
-        if (belowKitKat() || mActivity == null) {
+    public static void setStatusBarColor(Activity activity, int color) {
+        if (Version.belowKitKat() || activity == null) {
             return;
         }
 
-        if (hasL()) {
-            mActivity.getWindow()
+        if (Version.hasL()) {
+            activity.getWindow()
                     .setStatusBarColor(color);
             return;
         }
 
-        if (hasKitKat()) {
-            ViewGroup contentView = (ViewGroup) mActivity.findViewById(android.R.id.content);
+        if (Version.hasKitKat()) {
+            ViewGroup contentView = (ViewGroup) activity.findViewById(android.R.id.content);
 
             View statusBarView = contentView.getChildAt(0);
             //改变颜色时避免重复添加statusBarView
-            if (statusBarView != null && statusBarView.getMeasuredHeight() == ScreenUtil.getStatusHeight(mActivity)) {
+            if (statusBarView != null && statusBarView.getMeasuredHeight() == ScreenUtil.getStatusHeight(activity)) {
                 statusBarView.setBackgroundColor(color);
                 return;
             }
-            statusBarView = new View(mActivity);
+            statusBarView = new View(activity);
             statusBarView.setId(R.id.statusBarView);
             ViewGroup.LayoutParams lp = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
-                                                                   ScreenUtil.getStatusHeight(mActivity));
+                                                                   ScreenUtil.getStatusHeight(activity));
             statusBarView.setBackgroundColor(color);
             contentView.addView(statusBarView, 0, lp);
         }
     }
 
-    public void setStatusBarColorL(int color) {
-        ViewGroup contentView = (ViewGroup) mActivity.findViewById(android.R.id.content);
-
-        View statusBarView = contentView.getChildAt(0);
-        //改变颜色时避免重复添加statusBarView
-        if (statusBarView != null && statusBarView.getMeasuredHeight() == ScreenUtil.getStatusHeight(mActivity)) {
-            statusBarView.setBackgroundColor(color);
-            return;
-        }
-        statusBarView = new View(mActivity);
-        statusBarView.setId(R.id.statusBarView);
-        ViewGroup.LayoutParams lp =
-                new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ScreenUtil.getStatusHeight(mActivity));
-        statusBarView.setBackgroundColor(color);
-        contentView.addView(statusBarView, 0, lp);
-    }
+    ////////////////////////////////////////////////////////////////////////////////////////////
 
     private static final int[] THEME_ATTRS = {
             android.R.attr.colorPrimaryDark, android.R.attr.windowTranslucentStatus
     };
 
-    public static int getDefaultStatusBarBackground(Context context) {
+    static int getDefaultStatusBarBackground(Context context) {
+
         final TypedArray a = context.obtainStyledAttributes(THEME_ATTRS);
         try {
             return a.getColor(0, Color.TRANSPARENT);
+        } catch (Exception e) {
+            //e.printStackTrace();
         } finally {
             a.recycle();
         }
+
+        return Color.TRANSPARENT;
     }
 
-    public static boolean getWindowTranslucentStatus(Context context) {
+    public static void resetColorPrimaryDark() {
+        TSnackBar.setAnimationEndColor(-1);
+    }
+
+
+    //=====================================TranslucentStatusBar====================================================
+
+    /**
+     * 将布局扩展到状态栏
+     */
+    public static void translucentToStatusBar(Activity activity) {
+        if (activity == null || Version.belowKitKat()) {
+            return;
+        }
+
+        if (Version.hasKitKatAndUnderL()) {
+            activity.getWindow()
+                    .setFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS,
+                              WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+
+            return;
+        }
+
+        if (Version.hasL()) {
+            activity.getWindow()
+                    .clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+            activity.getWindow()
+                    .setStatusBarColor(Color.TRANSPARENT);
+            activity.getWindow()
+                    .getDecorView()
+                    .setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
+        }
+
+    }
+
+    public static boolean isTranslucentStatus(Context context) {
+        if (Version.belowKitKat()) {
+            return false;
+        }
+
+        if (context instanceof Activity) {
+            if (Version.hasL()) {
+                return (((Activity) context).getWindow()
+                        .getDecorView()
+                        .getSystemUiVisibility() & (View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                        | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN)) != 0;
+            } else {
+                return hasTranslucentStatusFlag((Activity) context);
+            }
+        }
+
         final TypedArray a = context.obtainStyledAttributes(THEME_ATTRS);
 
         try {
@@ -173,7 +200,32 @@ public class LUtils {
         }
     }
 
-    public static void resetColorPrimaryDark() {
-        TSnackBar.setColorPrimaryDark(-1);
+    @TargetApi(Build.VERSION_CODES.KITKAT) private static boolean hasTranslucentStatusFlag(final Activity activity) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            return (activity.getWindow()
+                    .getAttributes().flags & WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS) != 0;
+        }
+        return false;
     }
+
+    public static void paddingContainer(Context context, View container) {
+        if (context == null || container == null) return;
+        if (context instanceof Activity) {
+            if (Version.hasKitKat() && isTranslucentStatus(context)) {
+                ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) container.getLayoutParams();
+                params.height = ScreenUtil.getStatusHeight(context) + params.height;
+                container.setLayoutParams(params);
+                container.setPadding(0, ScreenUtil.getStatusHeight(context), 0, 0);
+            }
+        } else {
+            if (Version.hasKitKatAndUnderL() && isTranslucentStatus(context)) {
+                ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) container.getLayoutParams();
+                params.height = ScreenUtil.getStatusHeight(context) + params.height;
+                container.setLayoutParams(params);
+                container.setPadding(0, ScreenUtil.getStatusHeight(context), 0, 0);
+            }
+        }
+
+    }
+
 }

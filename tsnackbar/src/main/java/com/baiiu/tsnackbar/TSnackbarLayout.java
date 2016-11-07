@@ -4,8 +4,6 @@ import android.content.Context;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.widget.ViewDragHelper;
 import android.util.AttributeSet;
-import android.util.Log;
-import android.util.TypedValue;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.LinearLayout;
@@ -24,8 +22,6 @@ public class TSnackbarLayout extends LinearLayout {
     private float mDragDismissThreshold = 0.5f;
     private float mAlphaStartSwipeDistance = 0.1F;
     private float mAlphaEndSwipeDistance = 0.8F;
-
-    private static boolean windowTranslucentStatus = false;
 
     private View container;
     private TextView textView;
@@ -53,8 +49,7 @@ public class TSnackbarLayout extends LinearLayout {
         container = findViewById(R.id.ll_container);
         textView = (TextView) findViewById(android.R.id.text1);
 
-        if (/*TSnackbarLayout.windowTranslucentStatus || */LUtils.getWindowTranslucentStatus(getContext())) {
-            //            TSnackbarLayout.windowTranslucentStatus = true;
+        if (LUtils.isTranslucentStatus(getContext())) {
             container.setPadding(0, ScreenUtil.getStatusHeight(getContext()), 0, 0);
             return;
         }
@@ -71,12 +66,12 @@ public class TSnackbarLayout extends LinearLayout {
         }
 
 
-        TypedValue tv = new TypedValue();
-        if (getContext().getTheme()
-                .resolveAttribute(android.R.attr.actionBarSize, tv, true)) {
-            int actionBarHeight = TypedValue.complexToDimensionPixelSize(tv.data, getResources().getDisplayMetrics());
-            Log.d(getClass().getSimpleName(), actionBarHeight + "," + container.getMeasuredHeight());
-        }
+        //TypedValue tv = new TypedValue();
+        //if (getContext().getTheme()
+        //        .resolveAttribute(android.R.attr.actionBarSize, tv, true)) {
+        //    int actionBarHeight = TypedValue.complexToDimensionPixelSize(tv.data, getResources().getDisplayMetrics());
+        //    Log.d(getClass().getSimpleName(), actionBarHeight + "," + container.getMeasuredHeight());
+        //}
     }
 
     public void setType(Prompt type) {
@@ -179,7 +174,7 @@ public class TSnackbarLayout extends LinearLayout {
             }
 
             ViewCompat.setAlpha(changedView, alpha);
-            if (mOnViewPositionChangedListener != null && LUtils.hasL()) {
+            if (mOnViewPositionChangedListener != null && Version.hasL()) {
                 mOnViewPositionChangedListener.onViewAlphaChanged(1 - alpha);
             }
         }
