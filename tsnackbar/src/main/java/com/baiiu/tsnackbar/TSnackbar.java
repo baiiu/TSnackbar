@@ -15,6 +15,8 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.FrameLayout;
 
+import static com.baiiu.tsnackbar.LUtils.ATTR_STATUSBAR_COLOR;
+
 /**
  * Created by baiiu on 15/12/4.
  * 信息提示类,SnackBar本质上一个View.用callBack标识他的唯一性
@@ -24,6 +26,8 @@ public class TSnackBar implements TSnackbarLayout.onViewAlphaChangedListener {
     private ViewGroup mParent;
 
     private TSnackbarLayout mView;
+    private TSnackbarListener mTSnackbarListener;
+
     private static boolean coordinatorLayoutFitSystemWindows = false;
 
     public static final int LENGTH_INDEFINITE = -1;
@@ -52,14 +56,21 @@ public class TSnackBar implements TSnackbarLayout.onViewAlphaChangedListener {
             mView.setOnViewPositionChangedListener(this);
 
             if (mColorPrimaryDark == -1) {
-                setColorPrimaryDark(LUtils.getDefaultStatusBarBackground(parent.getContext()));
+                setAnimationEndColor(LUtils.getDefaultStatusBarBackground(parent.getContext()));
             }
         } else {
             mView = null;
         }
     }
 
-    public static void setColorPrimaryDark(int mColorPrimaryDark) {
+    public void setTSnackBarListener(TSnackbarListener listener) {
+        this.mTSnackbarListener = listener;
+    }
+
+    /**
+     * 设置颜色变化终点
+     */
+    public static void setAnimationEndColor(int mColorPrimaryDark) {
         if (TSnackBar.mColorPrimaryDark == mColorPrimaryDark) {
             return;
         }
@@ -74,6 +85,13 @@ public class TSnackBar implements TSnackbarLayout.onViewAlphaChangedListener {
     }
 
     @NonNull public static TSnackBar make(@NonNull View view, @NonNull String message, @NonNull Prompt prompt) {
+        return make(view, message, prompt, LENGTH_SHORT);
+    }
+
+
+    @NonNull public static TSnackBar make(@NonNull Activity activity, @NonNull String message, @NonNull Prompt prompt) {
+        View view = activity.findViewById(android.R.id.content);
+        if (view == null) throw new IllegalStateException("android.R.id.content might not be null");
         return make(view, message, prompt, LENGTH_SHORT);
     }
 
@@ -126,6 +144,7 @@ public class TSnackBar implements TSnackbarLayout.onViewAlphaChangedListener {
     }
 
     public void show() {
+        // TODO: 16/11/7 强引用持有，造成内存泄露
         TSnackBarManager.instance()
                 .show(mDuration, this);
     }
@@ -154,7 +173,6 @@ public class TSnackBar implements TSnackbarLayout.onViewAlphaChangedListener {
             return;
         }
         if (mView.getParent() == null) {
-            // TODO: 15/12/5 添加Bahavior
             mParent.addView(mView);
         }
 
@@ -212,7 +230,8 @@ public class TSnackBar implements TSnackbarLayout.onViewAlphaChangedListener {
     }
 
     private void animateStatusBarColor(boolean animateViewIn) {
-        if (!LUtils.hasL() || mDuration == LENGTH_INDEFINITE) {
+        if (mView == null) return;
+        if (LUtils.isTranslucentStatus(mView.getContext()) || mDuration == LENGTH_INDEFINITE) {
             return;
         }
 
@@ -221,9 +240,8 @@ public class TSnackBar implements TSnackbarLayout.onViewAlphaChangedListener {
                 setStatusBarColorLUtils(startColor);
             } else {
                 ObjectAnimator mStatusBarColorAnimator =
-                        ObjectAnimator.ofInt(LUtils.instance((Activity) mView.getContext()), "statusBarColor",
-                                             LUtils.instance((Activity) mView.getContext())
-                                                     .getStatusBarColor(), mColorPrimaryDark)
+                        ObjectAnimator.ofInt(LUtils.instance((Activity) mView.getContext()), ATTR_STATUSBAR_COLOR,
+                                             LUtils.getStatusBarColor((Activity) mView.getContext()), mColorPrimaryDark)
                                 .setDuration(ANIMATION_DURATION);
                 mStatusBarColorAnimator.setEvaluator(new ArgbEvaluator());
                 mStatusBarColorAnimator.start();
@@ -233,11 +251,11 @@ public class TSnackBar implements TSnackbarLayout.onViewAlphaChangedListener {
         }
     }
 
-    int startColor;
-    int startA;
-    int startR;
-    int startG;
-    int startB;
+    private int startColor;
+    private int startA;
+    private int startR;
+    private int startG;
+    private int startB;
 
 
     @Override public void onViewAlphaChanged(float fraction) {
@@ -247,6 +265,10 @@ public class TSnackBar implements TSnackbarLayout.onViewAlphaChangedListener {
                 (startB + (int) (fraction * (endB - startB)));
 
         setStatusBarColorLUtils(color);
+
+        if (fraction == 1 && mTSnackbarListener != null) {
+            mTSnackbarListener.ondismiss();
+        }
     }
 
     public void clearView() {
@@ -264,9 +286,11 @@ public class TSnackBar implements TSnackbarLayout.onViewAlphaChangedListener {
 
 
     private void setStatusBarColorLUtils(int color) {
+        if (mView == null) return;
+        if (LUtils.isTranslucentStatus(mView.getContext())) return;
+
         try {
-            LUtils.instance((Activity) mView.getContext())
-                    .setStatusBarColor(color);
+            LUtils.setStatusBarColor((Activity) mView.getContext(), color);
         } catch (Exception e) {
             Log.e(getClass().getSimpleName(), e.toString());
         }
